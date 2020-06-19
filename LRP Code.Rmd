@@ -1,0 +1,83 @@
+---
+title: "Linear Regression Project"
+author: "Alana Willis"
+date: "6/19/2020"
+output: html_document
+---
+
+
+Initial EDA to see trends between variables. Win Percentage, Free Throw Percentage, Average Points Per Game are possible response variables. 
+
+```{r}
+library("tidyverse")
+nba <- read.csv("http://www.stat.cmu.edu/cmsac/sure/materials/data/regression_projects/nba_team_season_summary.csv")
+
+# Created games per season and average points per game. 
+nba <- nba %>%
+  mutate(games = wins + losses, avg_points = total_points/games, avg_turnovers= turnovers/games )
+table(nba$games)
+
+#Histograms to check for normal distributions.
+nba %>%
+  ggplot(aes(x = win_perc)) +
+  geom_histogram()
+
+nba %>%
+  ggplot(aes(x = free_throw_attemps)) +
+  geom_histogram()
+
+nba %>%
+  ggplot(aes(x = free_throw_perc)) +
+  geom_histogram()
+
+nba %>%
+  ggplot(aes(x = avg_points)) +
+  geom_histogram()
+
+nba %>%
+  ggplot(aes(x = avg_points)) +
+  geom_histogram()
+
+nba %>%
+  ggplot(aes(x = avg_turnovers)) +
+  geom_histogram()
+
+#Scatter plots to check relationship between two variables. 
+nba %>%
+ggplot(aes(y = win_perc)) +
+  geom_point(aes(x = field_goal_perc), stat = "identity")
+nba %>%
+ggplot(aes(y = win_perc)) +
+  geom_point(aes(x = free_throw_perc), stat = "identity")
+nba %>%
+ggplot(aes(y = win_perc)) +
+  geom_point(aes(x = three_point_perc), stat = "identity")
+
+nba %>%
+  ggplot(aes(y = free_throw_perc)) +
+  geom_point(aes(x = personal_fouls), stat = "identity")
+nba %>%
+  ggplot(aes(y = free_throw_attemps)) +
+  geom_point(aes(x = personal_fouls), stat = "identity")
+
+nba %>%
+  ggplot(aes(y = win_perc)) +
+  geom_point(aes(x = avg_turnovers), stat = "identity")
+nba %>%
+  ggplot(aes(y = avg_points)) +
+  geom_point(aes(x = avg_turnovers), stat = "identity")
+```
+
+
+Initial Linear Regressions. 
+```{r}
+nba_turnovers <- lm(win_perc ~ avg_turnovers, data = nba)
+summary(nba_turnovers)
+
+```
+
+
+```{r}
+
+```
+
