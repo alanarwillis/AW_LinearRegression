@@ -1,6 +1,8 @@
 # AW_LinearRegression
 Linear Regression Project
-  NBA Dataset: corresponds to a single NBA team in a single regular season dating back to 2003
+ 
+ NBA Dataset: corresponds to a single NBA team in a single regular season dating back to 2003
+
 Variables:
   Team
   Win_Perc
