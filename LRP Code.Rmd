@@ -14,7 +14,14 @@ nba <- read.csv("http://www.stat.cmu.edu/cmsac/sure/materials/data/regression_pr
 
 # Created games per season and average points per game. 
 nba <- nba %>%
-  mutate(games = wins + losses, avg_points = total_points/games, avg_turnovers= turnovers/games )
+  mutate(games = wins + losses, avg_points = total_points/games, 
+         avg_turnovers= turnovers/games, 
+         avg_fouls= personal_fouls/games, 
+         avg_assists = assists/games, 
+         avg_rebounds = total_rebounds/games, 
+         asd = score_differential/games, 
+         avg_steals= steals/games, 
+         avg_blocks= blocks/games)
 table(nba$games)
 
 #Histograms to check for normal distributions.
@@ -35,12 +42,13 @@ nba %>%
   geom_histogram()
 
 nba %>%
-  ggplot(aes(x = avg_points)) +
+  ggplot(aes(x = asd)) +
   geom_histogram()
 
 nba %>%
   ggplot(aes(x = avg_turnovers)) +
   geom_histogram()
+
 
 #Scatter plots to check relationship between two variables. 
 nba %>%
@@ -69,15 +77,79 @@ nba %>%
 ```
 
 
+Correlation Matrix. 
+```{r}
+# Win Percentage 
+library(ggcorrplot)
+nba_corr <- nba %>%
+  dplyr::select(win_perc, free_throw_perc, 
+                three_point_perc, field_goal_perc, 
+                two_point_perc, avg_points, avg_turnovers, avg_fouls, score_differential)
+nba_corr_matrix <- cor(nba_corr)
+ggcorrplot(nba_corr_matrix)
+
+round_cor_matrix <- round(cor(nba_corr), 2)
+ggcorrplot(round_cor_matrix, 
+           hc.order = TRUE,
+           type = "lower",
+           lab = TRUE)
+
+
+# Score_Diff and Total Points
+nba_corr2 <- nba %>%
+  dplyr::select(avg_steals, avg_blocks, avg_rebounds, avg_assists, avg_fouls, avg_points, asd, avg_turnovers)
+nba_corr_matrix2 <- cor(nba_corr2)
+ggcorrplot(nba_corr_matrix2)
+
+round_cor_matrix2 <- round(cor(nba_corr2), 2)
+ggcorrplot(round_cor_matrix2, 
+           hc.order = TRUE,
+           type = "lower",
+           lab = TRUE)
+
+
+```
+Pairs Plots
+```{r}
+library(GGally)
+ggpairs(nba_corr2,
+        columns =
+          c("asd", "avg_steals",
+            "avg_blocks", "avg_rebounds",
+            "avg_assists","avg_fouls", "avg_points"))
+```
+We like avg score differential (asd) because it breaks games into three categories: winners, losers, and close games.
+We like avg points per game, it was correlated with many other variables and is an easy to understand variable (interpretations)
+We averaged all the variables to account for seasons with less games and to improve interpretability.
+
+
 Initial Linear Regressions. 
 ```{r}
-nba_turnovers <- lm(win_perc ~ avg_turnovers, data = nba)
-summary(nba_turnovers)
+nba_lm_1 <- lm(asd ~ avg_rebounds + avg_blocks + avg_steals + avg_fouls  + avg_assists + avg_turnovers, data = nba)
+summary(nba_lm_1)
+plot(nba_lm_1)
 
+nba_lm_2 <- lm(avg_points ~ )
 ```
-
-
+EDA for ASD. 
 ```{r}
+nba %>%
+  ggplot(aes(y = avg_points))+
+  geom_point(aes(x = asd), stat = "identity")
 
+summary(nba$asd)
+
+nba %>%
+  mutate(
+    asd_category = case_when(
+      asd <= -9 ~ 1,
+      asd <= -3 ~ 2,
+      asd <= 3 ~ 3,
+      asd <= 9 ~ 4, 
+      asd > 9 ~ 5,
+      TRUE ~ asd
+    ))
+#1=big loss, 2=loss, 3=close game, 4=win, 5=big win
 ```
+
 
